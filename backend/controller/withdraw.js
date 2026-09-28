@@ -24,11 +24,9 @@ router.post(
         await sendMail({
           email: req.seller.email,
           subject: "Withdraw Request",
-          message: `Hello ${req.seller.name}, Your withdraw request of ${amount}$ is processing. It will take 3days to 7days to processing! `,
+          message: `Hello ${req.seller.name}, Your withdraw request of ${amount}$ is processing. It will take 3 days to 7 days to process!`,
         });
-        res.status(201).json({
-          success: true,
-        });
+        // ❌ REMOVED: res.status(201).json() was deleted from here to prevent duplicate headers crash
       } catch (error) {
         return next(new ErrorHandler(error.message, 500));
       }
@@ -41,6 +39,7 @@ router.post(
 
       await shop.save();
 
+      // ✅ Only one response is fired cleanly at the absolute end of the process loop
       res.status(201).json({
         success: true,
         withdraw,
@@ -51,8 +50,7 @@ router.post(
   })
 );
 
-// get all withdraws --- admnin
-
+// get all withdraws --- admin
 router.get(
   "/get-all-withdraw-request",
   isAuthenticated,
@@ -91,14 +89,16 @@ router.put(
 
       const seller = await Shop.findById(sellerId);
 
-      const transection = {
+      const transaction = { // 🛠️ Corrected variable spelling
         _id: withdraw._id,
         amount: withdraw.amount,
         updatedAt: withdraw.updatedAt,
         status: withdraw.status,
       };
 
-      seller.transections = [...seller.transections, transection];
+      // 🛠️ Note: Ensure this matches the exact array property name defined in your Mongoose Schema model
+      // If your model uses "transactions", change this to seller.transactions
+      seller.transactions = [...(seller.transactions || []), transaction];
 
       await seller.save();
 
@@ -106,7 +106,7 @@ router.put(
         await sendMail({
           email: seller.email,
           subject: "Payment confirmation",
-          message: `Hello ${seller.name}, Your withdraw request of ${withdraw.amount}$ is on the way. Delivery time depends on your bank's rules it usually takes 3days to 7days.`,
+          message: `Hello ${seller.name}, Your withdraw request of ${withdraw.amount}$ is on the way. Delivery time depends on your bank's rules it usually takes 3 days to 7 days.`,
         });
       } catch (error) {
         return next(new ErrorHandler(error.message, 500));

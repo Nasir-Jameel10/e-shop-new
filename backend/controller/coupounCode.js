@@ -17,7 +17,7 @@ router.post(
       });
 
       if (isCoupounCodeExists.length !== 0) {
-        return next(new ErrorHandler("Coupoun code already exists!", 400));
+        return next(new ErrorHandler("Coupon code already exists!", 400));
       }
 
       const coupounCode = await CoupounCode.create(req.body);
@@ -27,7 +27,8 @@ router.post(
         coupounCode,
       });
     } catch (error) {
-      return next(new ErrorHandler(error, 400));
+      // ✅ FIXED BUG B: Passed error.message string safely
+      return next(new ErrorHandler(error.message, 400));
     }
   })
 );
@@ -38,13 +39,16 @@ router.get(
   isSeller,
   catchAsyncErrors(async (req, res, next) => {
     try {
-      const couponCodes = await CoupounCode.find({ shopId: req.seller.id });
+      // ✅ FIXED BUG A: Swapped id for _id to ensure the query successfully finds records
+      const couponCodes = await CoupounCode.find({ shopId: req.seller._id });
+      
       res.status(201).json({
         success: true,
         couponCodes,
       });
     } catch (error) {
-      return next(new ErrorHandler(error, 400));
+      // ✅ FIXED BUG B: Passed error.message string safely
+      return next(new ErrorHandler(error.message, 400));
     }
   })
 );
@@ -58,14 +62,15 @@ router.delete(
       const couponCode = await CoupounCode.findByIdAndDelete(req.params.id);
 
       if (!couponCode) {
-        return next(new ErrorHandler("Coupon code dosen't exists!", 400));
+        return next(new ErrorHandler("Coupon code doesn't exist!", 400));
       }
       res.status(201).json({
         success: true,
         message: "Coupon code deleted successfully!",
       });
     } catch (error) {
-      return next(new ErrorHandler(error, 400));
+      // ✅ FIXED BUG B: Passed error.message string safely
+      return next(new ErrorHandler(error.message, 400));
     }
   })
 );
@@ -82,7 +87,8 @@ router.get(
         couponCode,
       });
     } catch (error) {
-      return next(new ErrorHandler(error, 400));
+      // ✅ FIXED BUG B: Passed error.message string safely
+      return next(new ErrorHandler(error.message, 400));
     }
   })
 );
