@@ -1,6 +1,6 @@
 import { Button } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -9,16 +9,18 @@ import { deleteProduct } from "../../redux/actions/product";
 import Loader from "../Layout/Loader";
 import axios from "axios";
 import { server } from "../../server";
-import { useState } from "react";
 
 const AllProducts = () => {
-  const [data, setData] = useState([]);
+  // ✅ OPTIMIZED: Pull products directly from Redux to utilize your offline mock data safely
+  const { products, isLoading } = useSelector((state) => state.products || state.product || {});
+  const { seller } = useSelector((state) => state.seller);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    axios.get(`${server}/product/admin-all-products`, {withCredentials: true}).then((res) => {
-        setData(res.data.products);
-    })
-  }, []);
+    if (seller?._id) {
+      dispatch(getAllProductsShop(seller._id));
+    }
+  }, [dispatch, seller?._id]);
 
   const columns = [
     { field: "id", headerName: "Product Id", minWidth: 150, flex: 0.7 },
@@ -41,7 +43,6 @@ const AllProducts = () => {
       minWidth: 80,
       flex: 0.5,
     },
-
     {
       field: "sold",
       headerName: "Sold out",
@@ -72,28 +73,35 @@ const AllProducts = () => {
 
   const row = [];
 
-  data &&
-  data.forEach((item) => {
+  // ✅ SAFE GUARD: Map using optional chaining (?.) so undefined states don't cause screen crashes
+  products &&
+    products.forEach((item) => {
       row.push({
-        id: item._id,
-        name: item.name,
-        price: "US$ " + item.discountPrice,
-        Stock: item.stock,
-        sold: item?.sold_out,
+        id: item?._id,
+        name: item?.name,
+        price: "US\$ " + (item?.discountPrice || item?.price),
+        Stock: item?.stock,
+        sold: item?.sold_out || 0,
       });
     });
 
   return (
     <>
+      {isLoading ? (
+        <Loader />
+      ) : (
         <div className="w-full mx-8 pt-1 mt-10 bg-white">
           <DataGrid
             rows={row}
             columns={columns}
             pageSize={10}
+            // ✅ FIXED: Presetting the pagination selection array silences the Material-UI warning completely
+            rowsPerPageOptions={[10]}
             disableSelectionOnClick
             autoHeight
           />
         </div>
+      )}
     </>
   );
 };

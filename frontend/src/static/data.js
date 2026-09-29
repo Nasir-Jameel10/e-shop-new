@@ -222,20 +222,20 @@ export const navItems = [
       title: "Shoes",
       subTitle: "",
       image_Url:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvBQPQMVNRd6TtDkGs2dCri0Y-rxKkFOiEWw&usqp=CAU",
+        "https://images.footlocker.com/content/dam/final/footlockerasiapacific/assets/photos/2025/2025-11-summer-holiday/ecom/summer-refresh-stories/mens-jordan5.jpg",
     },
     {
       id: 6,
       title: "Gifts",
       subTitle: "",
       image_Url:
-        "https://securecdn.pymnts.com/wp-content/uploads/2014/11/Gifts-Photo-700x489.jpg",
+        "https://cdn.theatlantic.com/thumbor/hmUEQDSWj9xDrDAF17KdbY1uxnw=/0x0:4800x2700/1600x900/media/img/mt/2022/12/What_Gifts_Say/original.jpg",
     },
     {
       id: 7,
       title: "Pet Care",
       subTitle: "",
-      image_Url: "https://cdn.openpr.com/T/c/Tc15444071_g.jpg",
+      image_Url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4ylOYlq5DEWnyTQ4FqZ3ipGtNJHnzXXcIpId2q1zeRVvzp68x46D728k-&s=10",
     },
     {
       id: 8,
@@ -356,7 +356,7 @@ export const navItems = [
     {
       id: 4,
       category:"Others",
-      name: "New Fashionable Watch for men 2023 with multiple colors",
+      name: "New Fashionable Watch for men 2026 with multiple colors",
       description:
         "Product details are a crucial part of any eCommerce website or online marketplace. These details help the potential customers to make an informed decision about the product they are interested in buying. A well-written product description can also be a powerful marketing tool that can help to increase sales.Product details typically include information about the product's features, specifications, dimensions, weight, materials, and other relevant information that can help customers to understand the product better. The product details section should also include high-quality images and videos of the product, as well as customer reviews and ratings.",
       image_Url: [
@@ -456,7 +456,7 @@ export const navItems = [
     },
     {
       id: 4,
-      name: "New Fashionable Watch for men 2023 with multiple colors",
+      name: "New Fashionable Watch for men 2026 with multiple colors",
       description:
         "Product details are a crucial part of any eCommerce website or online marketplace. These details help the potential customers to make an informed decision about the product they are interested in buying. A well-written product description can also be a powerful marketing tool that can help to increase sales.Product details typically include information about the product's features, specifications, dimensions, weight, materials, and other relevant information that can help customers to understand the product better. The product details section should also include high-quality images and videos of the product, as well as customer reviews and ratings.",
       image_Url: [

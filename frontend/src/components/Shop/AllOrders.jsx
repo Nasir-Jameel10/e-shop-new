@@ -10,16 +10,16 @@ import { AiOutlineArrowRight } from "react-icons/ai";
 const AllOrders = () => {
   const { orders, isLoading } = useSelector((state) => state.order);
   const { seller } = useSelector((state) => state.seller);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getAllOrdersOfShop(seller._id));
-  }, [dispatch]);
+    if (seller?._id) {
+      dispatch(getAllOrdersOfShop(seller._id));
+    }
+  }, [dispatch, seller?._id]);
 
   const columns = [
     { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
-
     {
       field: "status",
       headerName: "Status",
@@ -38,7 +38,6 @@ const AllOrders = () => {
       minWidth: 130,
       flex: 0.7,
     },
-
     {
       field: "total",
       headerName: "Total",
@@ -46,7 +45,6 @@ const AllOrders = () => {
       minWidth: 130,
       flex: 0.8,
     },
-
     {
       field: " ",
       flex: 1,
@@ -70,15 +68,17 @@ const AllOrders = () => {
 
   const row = [];
 
-  orders &&
+  if (orders) {
     orders.forEach((item) => {
       row.push({
         id: item._id,
-        itemsQty: item.cart.length,
-        total: "US$ " + item.totalPrice,
+        // ✅ OPTIMIZED: Sums quantities up correctly to handle deep mock data sets cleanly
+        itemsQty: item.cart?.reduce((acc, cartItem) => acc + cartItem.qty, 0) || 0,
+        total: "US\$ " + item.totalPrice,
         status: item.status,
       });
     });
+  }
 
   return (
     <>
@@ -90,6 +90,8 @@ const AllOrders = () => {
             rows={row}
             columns={columns}
             pageSize={10}
+            // ✅ FIXED: Presetting the pagination option rule silences the Material-UI warning completely
+            rowsPerPageOptions={[10]}
             disableSelectionOnClick
             autoHeight
           />

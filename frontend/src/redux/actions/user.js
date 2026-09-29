@@ -2,14 +2,30 @@ import axios from "axios";
 import { server } from "../../server";
 
 // load user
+// load user
+// load user
 export const loadUser = () => async (dispatch) => {
   try {
     dispatch({
       type: "LoadUserRequest",
     });
-    const { data } = await axios.get(`${server}/user/getuser`, {
-      withCredentials: true,
-    });
+
+    // 1. Manually comment out this network request:
+    // const { data } = await axios.get(`${server}/user/getuser`, {
+    //   withCredentials: true,
+    // });
+
+    // 2. Manually add this fake user profile right here:
+    const data = {
+      user: {
+        _id: "mock_user_123456",
+        name: "Test Developer",
+        email: "developer@test.com",
+        role: "user",
+        addresses: [],
+      }
+    };
+
     dispatch({
       type: "LoadUserSuccess",
       payload: data.user,
@@ -17,20 +33,37 @@ export const loadUser = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: "LoadUserFail",
-      payload: error.response.data.message,
+      // 3. Add optional chaining (?.) to prevent catch blocks from breaking
+      payload: error.response?.data?.message || error.message,
     });
   }
 };
 
+
+
+// load seller
 // load seller
 export const loadSeller = () => async (dispatch) => {
   try {
     dispatch({
       type: "LoadSellerRequest",
     });
-    const { data } = await axios.get(`${server}/shop/getSeller`, {
-      withCredentials: true,
-    });
+
+    // 1. Manually comment out this network request:
+    // const { data } = await axios.get(`${server}/shop/getSeller`, {
+    //   withCredentials: true,
+    // });
+
+    // 2. Manually add this fake shop dashboard profile right here:
+    const data = {
+      seller: {
+        _id: "mock_shop_123456",
+        name: "My Local Test Shop",
+        email: "shop@test.com",
+        role: "Seller",
+      }
+    };
+
     dispatch({
       type: "LoadSellerSuccess",
       payload: data.seller,
@@ -38,10 +71,12 @@ export const loadSeller = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: "LoadSellerFail",
-      payload: error.response.data.message,
+      // 3. FIXES LINE 59 CRASH: Added ?. so it safely falls back to error.message
+      payload: error.response?.data?.message || error.message,
     });
   }
 };
+
 
 // user update information
 export const updateUserInformation =

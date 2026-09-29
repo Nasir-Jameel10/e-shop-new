@@ -9,58 +9,50 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const OrderDetails = () => {
-  const { orders, isLoading } = useSelector((state) => state.order);
+  const { orders } = useSelector((state) => state.order);
   const { seller } = useSelector((state) => state.seller);
   const dispatch = useDispatch();
   const [status, setStatus] = useState("");
   const navigate = useNavigate();
-
   const { id } = useParams();
 
   useEffect(() => {
-    dispatch(getAllOrdersOfShop(seller._id));
-  }, [dispatch]);
+    if (seller?._id) {
+      dispatch(getAllOrdersOfShop(seller._id));
+    }
+  }, [dispatch, seller?._id]);
 
   const data = orders && orders.find((item) => item._id === id);
 
-  const orderUpdateHandler = async (e) => {
-    await axios
-      .put(
+  const orderUpdateHandler = async () => {
+    try {
+      await axios.put(
         `${server}/order/update-order-status/${id}`,
-        {
-          status,
-        },
+        { status },
         { withCredentials: true }
-      )
-      .then((res) => {
-        toast.success("Order updated!");
-        navigate("/dashboard-orders");
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
-      });
+      );
+      toast.success("Order updated!");
+      navigate("/dashboard-orders");
+    } catch (error) {
+      // ✅ FIXED BUG A: Safe error optional chaining prevents crashes if the server drops
+      toast.error(error.response?.data?.message || error.message);
+    }
   };
 
-  const refundOrderUpdateHandler = async (e) => {
-    await axios
-    .put(
-      `${server}/order/order-refund-success/${id}`,
-      {
-        status,
-      },
-      { withCredentials: true }
-    )
-    .then((res) => {
+  const refundOrderUpdateHandler = async () => {
+    try {
+      await axios.put(
+        `${server}/order/order-refund-success/${id}`,
+        { status },
+        { withCredentials: true }
+      );
       toast.success("Order updated!");
-      dispatch(getAllOrdersOfShop(seller._id));
-    })
-    .catch((error) => {
-      toast.error(error.response.data.message);
-    });
-  }
-
-  console.log(data?.status);
-
+      if (seller?._id) dispatch(getAllOrdersOfShop(seller._id));
+    } catch (error) {
+      // ✅ FIXED BUG A: Safe error optional chaining prevents crashes if the server drops
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
 
   return (
     <div className={`py-4 min-h-screen ${styles.section}`}>
@@ -70,9 +62,7 @@ const OrderDetails = () => {
           <h1 className="pl-2 text-[25px]">Order Details</h1>
         </div>
         <Link to="/dashboard-orders">
-          <div
-            className={`${styles.button} !bg-[#fce1e6] !rounded-[4px] text-[#e94560] font-[600] !h-[45px] text-[18px]`}
-          >
+          <div className={`${styles.button} !bg-[#fce1e6] !rounded-[4px] text-[#e94560] font-[600] !h-[45px] text-[18px]`}>
             Order List
           </div>
         </Link>
@@ -83,7 +73,7 @@ const OrderDetails = () => {
           Order ID: <span>#{data?._id?.slice(0, 8)}</span>
         </h5>
         <h5 className="text-[#00000084]">
-          Placed on: <span>{data?.createdAt?.slice(0, 10)}</span>
+          Placed on: <span>{data?.createdAt ? data.createdAt.slice(0, 10) : "N/A"}</span>
         </h5>
       </div>
 
@@ -91,17 +81,18 @@ const OrderDetails = () => {
       <br />
       <br />
       {data &&
-        data?.cart.map((item, index) => (
-          <div className="w-full flex items-start mb-5">
+        data?.cart?.map((item, index) => (
+          <div className="w-full flex items-start mb-5" key={index}>
+            {/* ✅ FIXED MAIN CRASH: Added optional chaining and a fallback placeholder image string */}
             <img
-              src={`${item.images[0]?.url}`}
+              src={item?.images?.[0]?.url || "https://unsplash.com"}
               alt=""
-              className="w-[80x] h-[80px]"
+              className="w-[80px] h-[80px]" // ✅ FIXED BUG B: Corrected typo 'w-[80x]' to 'w-[80px]'
             />
             <div className="w-full">
-              <h5 className="pl-3 text-[20px]">{item.name}</h5>
+              <h5 className="pl-3 text-[20px]">{item?.name}</h5>
               <h5 className="pl-3 text-[20px] text-[#00000091]">
-                US${item.discountPrice} x {item.qty}
+                US\${item?.discountPrice || item?.price} x {item?.qty}
               </h5>
             </div>
           </div>
@@ -109,7 +100,7 @@ const OrderDetails = () => {
 
       <div className="border-t w-full text-right">
         <h5 className="pt-3 text-[18px]">
-          Total Price: <strong>US${data?.totalPrice}</strong>
+          Total Price: <strong>US\${data?.totalPrice}</strong>
         </h5>
       </div>
       <br />
@@ -118,19 +109,17 @@ const OrderDetails = () => {
         <div className="w-full 800px:w-[60%]">
           <h4 className="pt-3 text-[20px] font-[600]">Shipping Address:</h4>
           <h4 className="pt-3 text-[20px]">
-            {data?.shippingAddress.address1 +
-              " " +
-              data?.shippingAddress.address2}
+            {/* ✅ FIXED BUG C: Added optional chaining so it won't crash if string properties are blank */}
+            {(data?.shippingAddress?.address1 || "") + " " + (data?.shippingAddress?.address2 || "")}
           </h4>
-          <h4 className=" text-[20px]">{data?.shippingAddress.country}</h4>
-          <h4 className=" text-[20px]">{data?.shippingAddress.city}</h4>
-          <h4 className=" text-[20px]">{data?.user?.phoneNumber}</h4>
+          <h4 className="text-[20px]">{data?.shippingAddress?.country || "N/A"}</h4>
+          <h4 className="text-[20px]">{data?.shippingAddress?.city || "N/A"}</h4>
+          <h4 className="text-[20px]">{data?.user?.phoneNumber || "N/A"}</h4>
         </div>
         <div className="w-full 800px:w-[40%]">
           <h4 className="pt-3 text-[20px]">Payment Info:</h4>
           <h4>
-            Status:{" "}
-            {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
+            Status: {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
           </h4>
         </div>
       </div>
@@ -159,7 +148,7 @@ const OrderDetails = () => {
                 "Received",
                 "On the way",
                 "Delivered",
-              ].indexOf(data?.status)
+              ].indexOf(data?.status || "Processing")
             )
             .map((option, index) => (
               <option value={option} key={index}>
@@ -168,30 +157,21 @@ const OrderDetails = () => {
             ))}
         </select>
       )}
-      {
-        data?.status === "Processing refund" || data?.status === "Refund Success" ? (
-          <select value={status} 
-       onChange={(e) => setStatus(e.target.value)}
-       className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
-      >
-        {[
-            "Processing refund",
-            "Refund Success",
-          ]
-            .slice(
-              [
-                "Processing refund",
-                "Refund Success",
-              ].indexOf(data?.status)
-            )
+      {(data?.status === "Processing refund" || data?.status === "Refund Success") && (
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="w-[200px] mt-2 border h-[35px] rounded-[5px]"
+        >
+          {["Processing refund", "Refund Success"]
+            .slice(["Processing refund", "Refund Success"].indexOf(data?.status || "Processing refund"))
             .map((option, index) => (
               <option value={option} key={index}>
                 {option}
               </option>
             ))}
-      </select>
-        ) : null
-      }
+        </select>
+      )}
 
       <div
         className={`${styles.button} mt-5 !bg-[#FCE1E6] !rounded-[4px] text-[#E94560] font-[600] !h-[45px] text-[18px]`}

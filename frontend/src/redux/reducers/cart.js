@@ -6,27 +6,26 @@ const initialState = {
     : [],
 };
 
-export const cartReducer = createReducer(initialState, {
-  addToCart: (state, action) => {
-    const item = action.payload;
-    const isItemExist = state.cart.find((i) => i._id === item._id);
-    if (isItemExist) {
-      return {
-        ...state,
-        cart: state.cart.map((i) => (i._id === isItemExist._id ? item : i)),
-      };
-    } else {
-      return {
-        ...state,
-        cart: [...state.cart, item],
-      };
-    }
-  },
+export const cartReducer = createReducer(initialState, (builder) => {
+  builder
+    // 1. Handle Add to Cart
+    .addCase("addToCart", (state, action) => {
+      const item = action.payload;
+      const isItemExist = state.cart.find((i) => i._id === item._id);
 
-  removeFromCart: (state, action) => {
-    return {
-      ...state,
-      cart: state.cart.filter((i) => i._id !== action.payload),
-    };
-  },
+      if (isItemExist) {
+        // Direct Mutation via Immer: Simply swap the item at its index
+        const index = state.cart.findIndex((i) => i._id === isItemExist._id);
+        state.cart[index] = item;
+      } else {
+        // Direct Mutation via Immer: Simply push the item into the array
+        state.cart.push(item);
+      }
+    })
+    
+    // 2. Handle Remove from Cart
+    .addCase("removeFromCart", (state, action) => {
+      // Reassigning state property directly is fully supported in RTK
+      state.cart = state.cart.filter((i) => i._id !== action.payload);
+    });
 });

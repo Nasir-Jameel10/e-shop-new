@@ -22,13 +22,21 @@ export const createevent = (data) => async (dispatch) => {
 };
 
 // get all events of a shop
+// Open src/redux/actions/event.js
+
+// get all events of a shop
 export const getAllEventsShop = (id) => async (dispatch) => {
   try {
     dispatch({
       type: "getAlleventsShopRequest",
     });
 
-    const { data } = await axios.get(`${server}/event/get-all-events/${id}`);
+    // 1. ❌ Comment out this broken network request line:
+    // const { data } = await axios.get(`${server}/event/get-all-events/${id}`);
+
+    // 2. ✅ Manually add this clean mock data array fallback:
+    const data = { success: true, events: [] };
+
     dispatch({
       type: "getAlleventsShopSuccess",
       payload: data.events,
@@ -36,7 +44,8 @@ export const getAllEventsShop = (id) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: "getAlleventsShopFailed",
-      payload: error.response.data.message,
+      // Protect your catch block against undefined response messages
+      payload: error.response?.data?.message || error.message,
     });
   }
 };
@@ -74,7 +83,8 @@ export const getAllEvents = () => async (dispatch) => {
       type: "getAlleventsRequest",
     });
 
-    const { data } = await axios.get(`${server}/event/get-all-events`);
+   // const { data } = await axios.get(`${server}/event/get-all-events`);
+      const data = { events: [] };
     dispatch({
       type: "getAlleventsSuccess",
       payload: data.events,

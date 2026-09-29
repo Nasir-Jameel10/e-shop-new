@@ -109,12 +109,12 @@ const ProfileContent = ({ active }) => {
                 <div className=" w-[100%] 800px:w-[50%]">
                   <label className="block pb-2">Full Name</label>
                   <input
-                    type="text"
-                    className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+  type="text"
+  className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
+  required
+  value={name || ""} 
+  onChange={(e) => setName(e.target.value)}
+/>
                 </div>
                 <div className=" w-[100%] 800px:w-[50%]">
                   <label className="block pb-2">Email Address</label>

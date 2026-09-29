@@ -17,6 +17,8 @@ const CreateProduct = () => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState("");
+  
+  // ✅ Note: Kept these empty for clean number value validations, but guarded them in JSX
   const [originalPrice, setOriginalPrice] = useState();
   const [discountPrice, setDiscountPrice] = useState();
   const [stock, setStock] = useState();
@@ -30,7 +32,7 @@ const CreateProduct = () => {
       navigate("/dashboard");
       window.location.reload();
     }
-  }, [dispatch, error, success]);
+  }, [dispatch, error, success, navigate]);
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -64,7 +66,8 @@ const CreateProduct = () => {
     newForm.append("originalPrice", originalPrice);
     newForm.append("discountPrice", discountPrice);
     newForm.append("stock", stock);
-    newForm.append("shopId", seller._id);
+    newForm.append("shopId", seller?._id);
+    
     dispatch(
       createProduct({
         name,
@@ -74,16 +77,15 @@ const CreateProduct = () => {
         originalPrice,
         discountPrice,
         stock,
-        shopId: seller._id,
+        shopId: seller?._id,
         images,
       })
     );
   };
 
   return (
-    <div className="w-[90%] 800px:w-[50%] bg-white  shadow h-[80vh] rounded-[4px] p-3 overflow-y-scroll">
+    <div className="w-[90%] 800px:w-[50%] bg-white shadow h-[80vh] rounded-[4px] p-3 overflow-y-scroll">
       <h5 className="text-[30px] font-Poppins text-center">Create Product</h5>
-      {/* create product form */}
       <form onSubmit={handleSubmit}>
         <br />
         <div>
@@ -93,7 +95,7 @@ const CreateProduct = () => {
           <input
             type="text"
             name="name"
-            value={name}
+            value={name || ""}
             className="mt-2 appearance-none block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter your product name..."
@@ -108,9 +110,8 @@ const CreateProduct = () => {
             cols="30"
             required
             rows="8"
-            type="text"
             name="description"
-            value={description}
+            value={description || ""}
             className="mt-2 appearance-none block w-full pt-2 px-3 border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter your product description..."
@@ -123,7 +124,7 @@ const CreateProduct = () => {
           </label>
           <select
             className="w-full mt-2 border h-[35px] rounded-[5px]"
-            value={category}
+            value={category || ""}
             onChange={(e) => setCategory(e.target.value)}
           >
             <option value="Choose a category">Choose a category</option>
@@ -141,7 +142,7 @@ const CreateProduct = () => {
           <input
             type="text"
             name="tags"
-            value={tags}
+            value={tags || ""}
             className="mt-2 appearance-none block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             onChange={(e) => setTags(e.target.value)}
             placeholder="Enter your product tags..."
@@ -153,7 +154,8 @@ const CreateProduct = () => {
           <input
             type="number"
             name="price"
-            value={originalPrice}
+            // ✅ FIXED: Coalescing operator forces property string definition stability
+            value={originalPrice || ""}
             className="mt-2 appearance-none block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             onChange={(e) => setOriginalPrice(e.target.value)}
             placeholder="Enter your product price..."
@@ -166,8 +168,9 @@ const CreateProduct = () => {
           </label>
           <input
             type="number"
-            name="price"
-            value={discountPrice}
+            name="discountPrice"
+            // ✅ FIXED: Coalescing operator forces property string definition stability
+            value={discountPrice || ""}
             className="mt-2 appearance-none block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             onChange={(e) => setDiscountPrice(e.target.value)}
             placeholder="Enter your product price with discount..."
@@ -180,8 +183,9 @@ const CreateProduct = () => {
           </label>
           <input
             type="number"
-            name="price"
-            value={stock}
+            name="stock"
+            // ✅ FIXED: Coalescing operator forces property string definition stability
+            value={stock || ""}
             className="mt-2 appearance-none block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             onChange={(e) => setStock(e.target.value)}
             placeholder="Enter your product stock..."
@@ -205,10 +209,10 @@ const CreateProduct = () => {
               <AiOutlinePlusCircle size={30} className="mt-3" color="#555" />
             </label>
             {images &&
-              images.map((i) => (
+              images.map((i, index) => (
                 <img
                   src={i}
-                  key={i}
+                  key={index}
                   alt=""
                   className="h-[120px] w-[120px] object-cover m-2"
                 />
