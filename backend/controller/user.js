@@ -35,8 +35,9 @@ router.post("/create-user", async (req, res, next) => {
 
     const activationToken = createActivationToken(user);
 
-    const activationUrl = ``;
-
+    const activationUrl = `http://localhost:3000/activation/${activationToken}`;
+    console.log("ACTIVATION LINK:", activationUrl);
+ 
     try {
       await sendMail({
         email: user.email,
@@ -48,17 +49,24 @@ router.post("/create-user", async (req, res, next) => {
         message: `please check your email:- ${user.email} to activate your account!`,
       });
     } catch (error) {
+      // sirf development mein: email fail ho to bhi aage barhne dein
+      if (process.env.NODE_ENV === "DEVELOPMENT") {
+        return res.status(201).json({
+          success: true,
+          message:
+            "Email nahi gayi. Backend terminal se activation link copy karein.",
+        });
+      }
       return next(new ErrorHandler(error.message, 500));
     }
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
   }
 });
-
 // create activation token
 const createActivationToken = (user) => {
   return jwt.sign(user, process.env.ACTIVATION_SECRET, {
-    expiresIn: "5m",
+    expiresIn: "1h",
   });
 };
 
@@ -420,5 +428,26 @@ router.delete(
     }
   })
 );
-
+router.post("/dev-create-user", async (req, res, next) => {
+  try {
+    if (process.env.NODE_ENV === "PRODUCTION") {
+      return next(new ErrorHandler("Not allowed", 403));
+    }
+    const { name, email, password } = req.body;
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return next(new ErrorHandler("User already exists", 400));
+    }
+    const user = await User.create({
+      name,
+      email,
+      password,
+      avatar: { public_id: "sample_id", url: "https://via.placeholder.com/150" },
+    });
+    res.status(201).json({ success: true, user });
+  } catch (error) {
+    console.log("DEV CREATE ERROR:", error);
+    return next(new ErrorHandler(error.message, 400));
+  }
+});
 module.exports = router;

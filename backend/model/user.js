@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   email:{
     type: String,
     required: [true, "Please enter your email!"],
+    
   },
   password:{
     type: String,
@@ -58,7 +59,7 @@ const userSchema = new mongoose.Schema({
  },
  createdAt:{
   type: Date,
-  default: Date.now(),
+  default: Date.now,
  },
  resetPasswordToken: String,
  resetPasswordTime: Date,
@@ -66,14 +67,12 @@ const userSchema = new mongoose.Schema({
 
 
 //  Hash password
-userSchema.pre("save", async function (next){
-  if(!this.isModified("password")){
-    next();
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) {
+    return;
   }
-
   this.password = await bcrypt.hash(this.password, 10);
 });
-
 // jwt token
 userSchema.methods.getJwtToken = function () {
   return jwt.sign({ id: this._id}, process.env.JWT_SECRET_KEY,{
