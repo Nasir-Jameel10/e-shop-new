@@ -6,11 +6,15 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 app.use(cors({
-  origin: ['https://eshop-tutorial-pyri.vercel.app',],
-  credentials: true
+  origin: [
+    'http://localhost:3000' // 👈 Abhi ke liye sirf apna local URL rakhein
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" })); //  Is se badi images block nahi hongi
+
 app.use(cookieParser());
 app.use("/test", (req, res) => {
   res.send("Hello world!");

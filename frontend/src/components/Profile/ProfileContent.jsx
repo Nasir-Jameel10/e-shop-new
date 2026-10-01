@@ -44,6 +44,7 @@ const ProfileContent = ({ active }) => {
     }
   }, [error, successMessage]);
 
+
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(updateUserInformation(name, email, phoneNumber, password));
@@ -55,21 +56,23 @@ const ProfileContent = ({ active }) => {
     reader.onload = () => {
       if (reader.readyState === 2) {
         setAvatar(reader.result);
-        axios
-          .put(
-            `${server}/user/update-avatar`,
-            { avatar: reader.result },
-            {
-              withCredentials: true,
-            }
-          )
-          .then((response) => {
-            dispatch(loadUser());
-            toast.success("avatar updated successfully!");
-          })
-          .catch((error) => {
-            toast.error(error);
-          });
+       axios
+  .put(
+    "http://localhost:8000/api/v2/user/update-avatar", // 👈 `${server}` hata kar direct backend URL likh diya
+    { avatar: reader.result },
+    {
+      withCredentials: true,
+    }
+  )
+  .then((response) => {
+    dispatch(loadUser());
+    toast.success("Avatar updated successfully!");
+  })
+  .catch((error) => {
+    toast.error(error.response?.data?.message || "Something went wrong!");
+  });
+
+
       }
     };
 

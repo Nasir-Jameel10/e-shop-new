@@ -218,11 +218,17 @@ router.put(
   catchAsyncErrors(async (req, res, next) => {
     try {
       let existsUser = await User.findById(req.user.id);
+      
       if (req.body.avatar !== "") {
-        const imageId = existsUser.avatar.public_id;
+        // 1. Pehle check karein ke kya purani image database mein maujood hai ya nahi
+        const imageId = existsUser?.avatar?.public_id;
 
-        await cloudinary.v2.uploader.destroy(imageId);
+        // 2. Agar purani image ki ID maujood hai, sirf TABHI Cloudinary se delete karein
+        if (imageId && imageId !== "" && imageId !== "sample_id") {
+          await cloudinary.v2.uploader.destroy(imageId);
+        }
 
+        // 3. Nayi image upload karein
         const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
           folder: "avatars",
           width: 150,
@@ -245,6 +251,7 @@ router.put(
     }
   })
 );
+
 
 // update user addresses
 router.put(

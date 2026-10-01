@@ -4,7 +4,15 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server);
+
+//  FIXED: Added CORS configuration directly into the Socket.IO initialization
+const io = socketIO(server, {
+  cors: {
+    origin: "http://localhost:3000", // Allow your React frontend dev origin port
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 
 require("dotenv").config({
   path: "./.env",
@@ -43,7 +51,7 @@ const createMessage = ({ senderId, receiverId, text, images }) => ({
 
 io.on("connection", (socket) => {
   // when connect
-  console.log(`a user is connected`);
+  console.log(`a user is connected: ${socket.id}`);
 
   // take userId and socketId from user
   socket.on("addUser", (userId) => {
@@ -66,8 +74,10 @@ io.on("connection", (socket) => {
       messages[receiverId].push(message);
     }
 
-    // send the message to the recevier
-    io.to(user?.socketId).emit("getMessage", message);
+    // send the message to the receiver
+    if (user) {
+      io.to(user.socketId).emit("getMessage", message);
+    }
   });
 
   socket.on("messageSeen", ({ senderId, receiverId, messageId }) => {
@@ -83,11 +93,13 @@ io.on("connection", (socket) => {
         message.seen = true;
 
         // send a message seen event to the sender
-        io.to(user?.socketId).emit("messageSeen", {
-          senderId,
-          receiverId,
-          messageId,
-        });
+        if (user) {
+          io.to(user.socketId).emit("messageSeen", {
+            senderId,
+            receiverId,
+            messageId,
+          });
+        }
       }
     }
   });
@@ -108,6 +120,8 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(process.env.PORT || 8000, () => {
-  console.log(`server is running on port ${process.env.PORT || 8000}`);
+// Use explicit naming fallbacks for local deployment run-scripts
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () => {
+  console.log(`Server successfully listening and running on port ${PORT}`);
 });

@@ -71,19 +71,13 @@ const AllProducts = () => {
     },
   ];
 
-  const row = [];
-
-  // ✅ SAFE GUARD: Map using optional chaining (?.) so undefined states don't cause screen crashes
-  products &&
-    products.forEach((item) => {
-      row.push({
-        id: item?._id,
-        name: item?.name,
-        price: "US\$ " + (item?.discountPrice || item?.price),
-        Stock: item?.stock,
-        sold: item?.sold_out || 0,
-      });
-    });
+  const row = products ? products.map((item) => ({
+  id: item?._id,
+  name: item?.name,
+  price: `US$ ${item?.discountPrice || item?.price}`,
+  Stock: item?.stock,
+  sold: item?.sold_out || 0,
+})) : []; 
 
   return (
     <>
